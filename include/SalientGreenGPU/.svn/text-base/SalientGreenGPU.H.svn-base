@@ -1,0 +1,194 @@
+/*
+ * Salient Green
+ * Copyright (C) 2011 Shane Grant
+ * wgrant@usc.edu
+ *
+ * Salient Green is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 3.0
+ * of the License, or (at your option) any later version.
+ *
+ * Salient Green is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with Salient Green; if not, see
+ * <http://www.gnu.org/licenses/> */
+
+#ifndef SALIENTGREEN_SALIENTGREENGPU_H_
+#define SALIENTGREEN_SALIENTGREENGPU_H_
+
+#include <SalientGreenGPU/Filters/LogGabor.H>
+#include <SalientGreenGPU/Filters/Gaussian.H>
+#include <SalientGreenGPU/Normalization/Normalization.H>
+#include <string>
+#include <array>
+
+namespace sg
+{
+  class SalientGreenGPU
+  {
+    public:
+      //! Contains the results from computing saliency
+      struct Results
+      {
+				Results() {}
+
+				Results( cv::Size sz ) : 
+					lResponse( sz, CV_32FC1 ),
+					aResponse( sz, CV_32FC1 ),
+					bResponse( sz, CV_32FC1 ),
+					iResponse( sz, CV_32FC1 ),
+					rgResponse( sz, CV_32FC1 ),
+					byResponse( sz, CV_32FC1 ),
+					oResponse( sz, CV_32FC1 ),
+					sResponse( sz, CV_32FC1 ),
+					rgbSaliency( sz, CV_32FC1 ),
+					labSaliency( sz, CV_32FC1 ),
+					symSaliency( sz, CV_32FC1 )
+				{}
+
+        cv::Mat lResponse;
+        cv::Mat aResponse;
+        cv::Mat bResponse;
+
+        cv::Mat iResponse;
+        cv::Mat rgResponse;
+        cv::Mat byResponse;
+
+        cv::Mat oResponse;
+
+        cv::Mat sResponse;
+
+        cv::Mat rgbSaliency;
+        cv::Mat labSaliency;
+        cv::Mat symSaliency;
+
+        //! Displays all results on screen
+        void show();
+        //! Saves all results to images
+        void save( std::string const & prefix, std::string const & filetype );
+      };
+
+      //! Weights for computing LAB saliency
+      struct labWeights
+      {
+        labWeights() : l( 1 ), a( 0.5 ), b( 0.5 ), o( 1 )
+        { }
+
+        labWeights( double l_, double a_, double b_, double o_ ) : l( l_ ), a( a_ ), b( b_ ),
+          o( o_ )
+        { }
+
+        double l;
+        double a;
+        double b;
+        double o;
+      };
+
+      //! Weights for computing symmetry saliency
+      struct symWeights : public labWeights
+      {
+        symWeights() : labWeights( 1.0, 0.5, 0.5, 1.0 ), s( 1.0 )
+        { }
+
+        symWeights( double l_, double a_, double b_, double o_, double s_ ) : labWeights( l_, a_, b_, o_ ),
+          s( s_ )
+        { }
+
+        double s;
+      };
+
+      //! Weights for computing RGB saliency
+      struct rgbWeights
+      {
+        rgbWeights() : i( 1.0 ), rg( 0.5 ), by( 0.5 ), o( 1.0 )
+        { }
+
+        rgbWeights( double i_, double rg_, double by_, double o_ ) : i( i_ ), rg( rg_ ), by( by_ ),
+          o( o_ )
+        { }
+
+        double i;
+        double rg;
+        double by;
+        double o;
+      };
+
+      //! Initializes Salient Green and precomputes several filters
+      SalientGreenGPU();
+
+			//! Releases all GPU data
+			void release();
+
+      //! Computes a saliency map for a new image using an FFT based approach on the GPU
+      /*! @param[in] image An RGB CV_8U3 formatted image
+          @param[in] rw The rgb weights.  Pass nullptr to disable
+          @param[in] lw The lab weights.  Pass nullptr to disable
+          @param[in] sw The sym weights.  Pass nullptr to disable
+          @return A saliency map */
+      Results computeSaliencyGPU( cv::Mat const & image,
+                                  rgbWeights const * rw = nullptr,
+                                  labWeights const * lw = nullptr,
+                                  symWeights const * sw = nullptr );
+
+    protected:
+      //! Prepares all filters needed by saliency
+      void prepareFiltersGPU();
+
+			//! Allocates all buffers that we'll need
+			void allocateGPUBuffers( bool rw, bool lw, bool sw );
+
+      //! Calculates a symmetry map
+      /*! @param[in] fftImage Single channel grayscale frequency domain image
+			 		@param[out] output A single channel pre-allocated matrix */
+      void doSymmetryAndGaborGPU( cv::gpu::GpuMat const & fftImage, cv::gpu::GpuMat & symmetry, cv::gpu::GpuMat & gabor );
+
+      //! Calculates an orientation conspicuity map
+			/*! @param[in] fftImage SIngle channel grayscale frequency domain image
+			 		@param[out] output A single channel pre-allocated matrix */
+      void doGaborGPU( cv::gpu::GpuMat const & fftImage, cv::gpu::GpuMat & output );
+
+      //! Calculates a map using a center surround bank
+			/*! @param[in] fftImage A single channel frequency domain image
+			 		@param[out] output A single channel pre-allocated matrix */
+      void doDoGGPU( cv::gpu::GpuMat const & fftImage, cv::gpu::GpuMat & output );
+
+    private:
+      cv::Mat itsInputImage; //!< The input image
+			cv::gpu::GpuMat itsInputImageGPU; //!< The input image on the GPU
+
+			//======= FFT Stuff =============
+      cv::Size itsFFTSizeSpatial;
+      cv::Size itsFFTSizeFrequency;
+      cv::Size itsMaxFilterSize;
+      LogGabor itsLogGabor; //!< Log Gabor filter bank
+      DoGCenterSurround itsDoGBank; //!< Center surround operation for color channels
+      DoGCenterSurround itsDoGBankFrequency; //!< Handles DoG operation on gabor results
+      NormalizeIterative itsNormalizeIterSpatial;
+      NormalizeIterative itsNormalizeIterFrequency;
+
+			// GPU Buffers
+			cv::gpu::GpuMat itsSaliencyBgr;
+			cv::gpu::GpuMat itsSaliencyLab;
+			cv::gpu::GpuMat itsSaliencySym;
+			cv::gpu::GpuMat itsGpuBuffer; //!< Sized same as image, one channel
+			cv::gpu::GpuMat itsGpuBufferSpatial; //!< Used in spatial calculations, two channels
+			std::array<cv::gpu::GpuMat, 2> itsGpuBufferFrequency; //!< Used in frequency calculations, two channels each
+		 	std::vector<cv::gpu::GpuMat> itsSplitBufferSpatial; //!< Pre-allocated buffer for splitting data
+		 	std::vector<cv::gpu::GpuMat> itsSplitBufferFrequency; //!< Pre-allocated buffer for splitting data
+			std::array<cv::gpu::GpuMat, 3> itsLabResponse;
+			std::array<cv::gpu::GpuMat, 3> itsLabFFT;
+			std::array<cv::gpu::GpuMat, 3> itsBgrResponse;
+			std::array<cv::gpu::GpuMat, 3> itsBgrFFT;
+			cv::gpu::GpuMat itsOResponse;
+			cv::gpu::GpuMat itsSResponse;
+			cv::gpu::GpuMat itsGrayscaleFFT;
+			cv::gpu::GpuMat itsOBuffer;
+			cv::gpu::GpuMat itsSBuffer;
+  };
+}
+
+#endif // SALIENTGREENGPU_SALIENTGREEN_H_
