@@ -40,31 +40,17 @@ namespace sg
 					lResponse( sz, CV_32FC1 ),
 					aResponse( sz, CV_32FC1 ),
 					bResponse( sz, CV_32FC1 ),
-					iResponse( sz, CV_32FC1 ),
-					rgResponse( sz, CV_32FC1 ),
-					byResponse( sz, CV_32FC1 ),
 					oResponse( sz, CV_32FC1 ),
-					sResponse( sz, CV_32FC1 ),
-					rgbSaliency( sz, CV_32FC1 ),
 					labSaliency( sz, CV_32FC1 ),
-					symSaliency( sz, CV_32FC1 )
 				{}
 
         cv::Mat lResponse;
         cv::Mat aResponse;
         cv::Mat bResponse;
 
-        cv::Mat iResponse;
-        cv::Mat rgResponse;
-        cv::Mat byResponse;
-
         cv::Mat oResponse;
 
-        cv::Mat sResponse;
-
-        cv::Mat rgbSaliency;
         cv::Mat labSaliency;
-        cv::Mat symSaliency;
 
         //! Displays all results on screen
         void show();
@@ -88,35 +74,6 @@ namespace sg
         double o;
       };
 
-      //! Weights for computing symmetry saliency
-      struct symWeights : public labWeights
-      {
-        symWeights() : labWeights( 1.0, 0.5, 0.5, 1.0 ), s( 1.0 )
-        { }
-
-        symWeights( double l_, double a_, double b_, double o_, double s_ ) : labWeights( l_, a_, b_, o_ ),
-          s( s_ )
-        { }
-
-        double s;
-      };
-
-      //! Weights for computing RGB saliency
-      struct rgbWeights
-      {
-        rgbWeights() : i( 1.0 ), rg( 0.5 ), by( 0.5 ), o( 1.0 )
-        { }
-
-        rgbWeights( double i_, double rg_, double by_, double o_ ) : i( i_ ), rg( rg_ ), by( by_ ),
-          o( o_ )
-        { }
-
-        double i;
-        double rg;
-        double by;
-        double o;
-      };
-
       //! Initializes Salient Green and precomputes several filters
       SalientGreenGPU();
 
@@ -125,26 +82,17 @@ namespace sg
 
       //! Computes a saliency map for a new image using an FFT based approach on the GPU
       /*! @param[in] image An RGB CV_8U3 formatted image
-          @param[in] rw The rgb weights.  Pass nullptr to disable
           @param[in] lw The lab weights.  Pass nullptr to disable
-          @param[in] sw The sym weights.  Pass nullptr to disable
           @return A saliency map */
       Results computeSaliencyGPU( cv::Mat const & image,
-                                  rgbWeights const * rw = nullptr,
-                                  labWeights const * lw = nullptr,
-                                  symWeights const * sw = nullptr );
+                                  labWeights const * lw = nullptr );
 
     protected:
       //! Prepares all filters needed by saliency
       void prepareFiltersGPU();
 
 			//! Allocates all buffers that we'll need
-			void allocateGPUBuffers( bool rw, bool lw, bool sw );
-
-      //! Calculates a symmetry map
-      /*! @param[in] fftImage Single channel grayscale frequency domain image
-			 		@param[out] output A single channel pre-allocated matrix */
-      void doSymmetryAndGaborGPU( cv::gpu::GpuMat const & fftImage, cv::gpu::GpuMat & gabor );
+			void allocateGPUBuffers();
 
       //! Calculates an orientation conspicuity map
 			/*! @param[in] fftImage SIngle channel grayscale frequency domain image
@@ -171,9 +119,7 @@ namespace sg
       NormalizeIterative itsNormalizeIterFrequency;
 
 			// GPU Buffers
-			cv::gpu::GpuMat itsSaliencyBgr;
 			cv::gpu::GpuMat itsSaliencyLab;
-			cv::gpu::GpuMat itsSaliencySym;
 			cv::gpu::GpuMat itsGpuBuffer; //!< Sized same as image, one channel
 			cv::gpu::GpuMat itsGpuBufferSpatial; //!< Used in spatial calculations, two channels
 			std::array<cv::gpu::GpuMat, 2> itsGpuBufferFrequency; //!< Used in frequency calculations, two channels each
@@ -181,13 +127,10 @@ namespace sg
 		 	std::vector<cv::gpu::GpuMat> itsSplitBufferFrequency; //!< Pre-allocated buffer for splitting data
 			std::array<cv::gpu::GpuMat, 3> itsLabResponse;
 			std::array<cv::gpu::GpuMat, 3> itsLabFFT;
-			std::array<cv::gpu::GpuMat, 3> itsBgrResponse;
-			std::array<cv::gpu::GpuMat, 3> itsBgrFFT;
 			cv::gpu::GpuMat itsOResponse;
 			cv::gpu::GpuMat itsSResponse;
 			cv::gpu::GpuMat itsGrayscaleFFT;
 			cv::gpu::GpuMat itsOBuffer;
-			cv::gpu::GpuMat itsSBuffer;
   };
 }
 

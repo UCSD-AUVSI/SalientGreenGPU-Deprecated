@@ -33,9 +33,7 @@ int main( int argc, char ** argv )
   // Timer t;
 
   // Run on every file in directory, output in another directory
-  sg::SalientGreenGPU::rgbWeights rw;
   sg::SalientGreenGPU::labWeights lw;
-  sg::SalientGreenGPU::symWeights sw;
 
   //sw.s = 2;
 
@@ -48,9 +46,7 @@ int main( int argc, char ** argv )
 
       input = cv::imread( argv[2] );
       results = green.computeSaliencyGPU( input,
-                                          &rw,
-                                          &lw,
-                                          &sw );
+                                          &lw );
 
 			// Timing version, let it run once to warm up the GPU
 			/*t.start();

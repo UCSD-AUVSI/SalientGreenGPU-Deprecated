@@ -70,11 +70,9 @@ namespace sg
           @param[in] numScales Number of scales to use
           @parma[in] minWaveLength Wavelength for smallest scale
           @param[in] mult Scaling factor between scales
-          @param[in] sigmaOnf Ratio of standard deviation of Gaussian describing the log gabor filter's transfer function
-          @param[in] numStdNoise Number of standard deviations of the noise energy beyond the mean at which we set up the noise
-          threshold point.  Increase this for noisy images */
+          @param[in] sigmaOnf Ratio of standard deviation of Gaussian describing the log gabor filter's transfer function */
       LogGabor( int width, int height, cv::Mat const & lowpass, int numScales = 2, double minWaveLength = 3.0,
-                double mult = 3.00, double sigmaOnf = 0.55, float numStdNoise = 10.0 );
+                double mult = 3.00, double sigmaOnf = 0.55 );
       // LEWIS: was numScales=6
 
 			// 7 1.75 .55 20.0 
@@ -91,15 +89,19 @@ namespace sg
             Cache for IDFT results */
       void addFilters( int numOrientations = 6 );
 
-      void getSymmetryAndEdgeResponses( cv::gpu::GpuMat const & fftImage, cv::gpu::GpuMat & edges,
-                                        std::vector<cv::gpu::GpuMat> & splitBuffer, DoGCenterSurround & dog, size_t maxEdgeScale = 3 );
+			//! Gets the edge responses for an input
+			/*! @param[in] fftImage The fft image to work on
+			 		@param[out] edges The result of running the computation (two channel complex frequency domain result)
+					@param[in] splitBuffer A buffer used for splitting channels
+					@param[in] dog Center surround processing */
+			void getEdgeResponses( cv::gpu::GpuMat const & fftImage, cv::gpu::GpuMat & edges,
+					std::vector<cv::gpu::GpuMat> & splitBuffer, DoGCenterSurround & dog );
 
     protected:
       bool itsValid;
       int itsWidth;
       int itsHeight;
       double itsMult;
-      float itsNumStdNoise;
       cv::Mat itsSine;
       cv::Mat itsCosine;
 

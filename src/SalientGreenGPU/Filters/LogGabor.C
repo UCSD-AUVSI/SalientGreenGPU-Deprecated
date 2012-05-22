@@ -52,9 +52,9 @@ sg::LogGabor::LogGabor() : itsValid( false )
 
 sg::LogGabor::LogGabor( int width, int height, cv::Mat const & lowpass,
                         int numScales, double minWaveLength,
-                        double mult, double sigmaOnf, float numStdNoise ) :
+                        double mult, double sigmaOnf ) :
   itsValid( false ), itsWidth( width ), itsHeight( height ),
-  itsMult( mult ), itsNumStdNoise( numStdNoise ),
+  itsMult( mult ),
   itsSine( height, width, CV_32FC1 ), itsCosine( height, width, CV_32FC1 ),
 	itsSummedMag( height, width, CV_32FC1 ),
 	itsSummedEnergy( height, width, CV_32FC1 )
@@ -198,8 +198,8 @@ void sg::LogGabor::addFilters( int numOrientations )
   itsValid = true;
 }
 
-void sg::LogGabor::getSymmetryAndEdgeResponses( cv::gpu::GpuMat const & fftImage, cv::gpu::GpuMat & edges,
-		std::vector<cv::gpu::GpuMat> & splitBuffer, DoGCenterSurround & dog, size_t maxEdgeScale )
+void sg::LogGabor::getAndEdgeResponses( cv::gpu::GpuMat const & fftImage, cv::gpu::GpuMat & edges,
+		std::vector<cv::gpu::GpuMat> & splitBuffer, DoGCenterSurround & dog )
 {
 	if( !itsValid )
 	{
@@ -209,16 +209,10 @@ void sg::LogGabor::getSymmetryAndEdgeResponses( cv::gpu::GpuMat const & fftImage
 
 	edges.setTo( 0.0f );
   
-	// const float medDenom = std::sqrt( std::log( 4 ) );
- //  const float tauMult  = ( 1.0f - std::pow( ( 1.0f / itsMult ), itsGaborScales.size() ) ) / ( 1.0f - ( 1.0f / itsMult ) );
- //  const float meanMult = std::sqrt( M_PI / 2.0f );
- //  const float sigmaMult = std::sqrt( ( 4.0f - M_PI ) / 2.0f );
- //  float tau = 0.0f;
-  
   // outer loop for orientations
   for( size_t o = 0; o < itsFilters.size(); ++o )
   {
-    // inner loop over scales, both affect i
+    // inner loop over scales
     for( size_t s = 0; s < itsGaborScales.size(); ++s )
     {
       // see note in addFilters about why this is a normal multiplication
@@ -229,45 +223,18 @@ void sg::LogGabor::getSymmetryAndEdgeResponses( cv::gpu::GpuMat const & fftImage
       // Get magnitude
       cv::gpu::magnitude( itsFFTBuffer[1], splitBuffer[0] );
       
-			// NOTE: if we use Thrust and make thrust::device_ptr<T> out of matrix.data for beginning
-			// and matrix.data + cols * rows for end, we can use thrust algorithms
-			// we could then use a sort and take the middle value to get the median
-			// right now we're using the mean which isn't a proper estimator for the distribution
-      // if( s == 0 ) // at the first scale only
-      //   tau = cv::gpu::sum( splitBuffer[0] )[0] / ( splitBuffer[0].rows * splitBuffer[0].cols ) / medDenom;
-
-      // LEWIS: TODO: fully remove symmetry
-			
 			// Compute edge response
 			// 	the edge response is a DoG applied to the magnitude
 			// 	so we'll pad the magnitude with zero valued complex
 			// 	take the DFT and then pass it through the DoG processing chain
-			// if( s < maxEdgeScale )
-			// {
 			splitBuffer[1].setTo( 0.0f );
 			cv::gpu::GpuMat merge[] = { splitBuffer[0], splitBuffer[1] };
 			cv::gpu::merge( merge, 2, itsFFTBuffer[0] );
 			cv::gpu::dft( itsFFTBuffer[0], itsFFTBuffer[0], itsFFTBuffer[0].size() );
 			dog( itsFFTBuffer[0], itsFFTBuffer[2] );
+			
 			// accumulate result into edges
 			addFC2Wrapper( edges, itsFFTBuffer[2], edges );
-			// }
-	
-			// // get real and imaginary response
-   //    cv::gpu::split( itsFFTBuffer[1], splitBuffer );
-
-   //    cv::gpu::absdiff( splitBuffer[0], 0.0f, splitBuffer[0] );
-   //    cv::gpu::absdiff( splitBuffer[1], 0.0f, splitBuffer[1] );
-
-   //    cv::gpu::subtract( splitBuffer[0], splitBuffer[1], splitBuffer[0] );
     } // end scales
-
-    // // Calculate noise threshold
-    // const float totalTau = tau * tauMult;
-    // const float estNoiseMean = totalTau * meanMult;
-    // const float estNoiseSigma = totalTau * sigmaMult;
-
-    // // compute normalization constant
-    // const float T = std::max( estNoiseMean + itsNumStdNoise * estNoiseSigma, std::numeric_limits<float>::epsilon() );
-  }
+  } // end orientations
 }
