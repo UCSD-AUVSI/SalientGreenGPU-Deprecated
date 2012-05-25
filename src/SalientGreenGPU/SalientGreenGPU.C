@@ -118,7 +118,7 @@ auto sg::SalientGreenGPU::computeSaliencyGPU( cv::Mat const & image,
   {
 		release();
     prepareFiltersGPU();
-    allocateGPUBuffers( lw != nullptr );
+    allocateGPUBuffers( );//lw != nullptr ); // LEWIS
   }
 
   // Compute saliency
@@ -223,9 +223,11 @@ auto sg::SalientGreenGPU::computeSaliencyGPU( cv::Mat const & image,
     cv::gpu::add( itsSaliencyLab, itsGpuBuffer, itsSaliencyLab );
 
 		cv::Mat temp( itsSaliencyLab.size(), itsSaliencyLab.type() );
-		temp = itsSaliencyLab;
-		itsLabFFT[0] = padImageFFT( temp, itsMaxFilterSize, itsFFTSizeSpatial );
-
+		// temp = itsSaliencyLab;
+    itsSaliencyLab.download(temp); // LEWIS
+		// itsLabFFT[0] = padImageFFT( temp, itsMaxFilterSize, itsFFTSizeSpatial );
+    itsLabFFT[0].upload(padImageFFT( temp, itsMaxFilterSize, itsFFTSizeSpatial )); // LEWIS
+    
     itsNormalizeIterSpatial( itsLabFFT[0], itsSaliencyLab, itsSplitBufferSpatial, 0 );
   }
 

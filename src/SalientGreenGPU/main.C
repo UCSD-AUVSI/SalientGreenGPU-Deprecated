@@ -29,119 +29,55 @@
 
 int main( int argc, char ** argv )
 {
+  std::cout << "SalientGreenGPU launched\n";
   sg::SalientGreenGPU green;
   // Timer t;
 
   // Run on every file in directory, output in another directory
   sg::SalientGreenGPU::labWeights lw;
+      
+  cv::Mat input;
+  sg::SalientGreenGPU::Results results;
 
-  //sw.s = 2;
+  input = cv::imread( "~/Code/SalientGreenGPU/test/img_1.JPG");
+  results = green.computeSaliencyGPU( input,
+                  &lw );
+
+  // Timing version, let it run once to warm up the GPU
+  /*t.start();
+  results = green.computeSaliencyGPU( input,
+                  &rw,
+                  &lw,
+                  &sw );
+  t.stop();*/
+
+  results.save( "~/Code/SalientGreenGPU/test/", "jpg" );
+  cv::imwrite( "~/Code/SalientGreenGPU/test/input.jpg", input );
 
   if( argc > 2 )
   {
     if( std::string( argv[1] ) == "file" )
     {
-      cv::Mat input;
-      sg::SalientGreenGPU::Results results;
+         //    cv::Mat input;
+         //    sg::SalientGreenGPU::Results results;
 
-      input = cv::imread( argv[2] );
-      results = green.computeSaliencyGPU( input,
-                                          &lw );
+         //    input = cv::imread( argv[2] );
+         //    results = green.computeSaliencyGPU( input,
+         //                                        &lw );
 
-			// Timing version, let it run once to warm up the GPU
-			/*t.start();
-      results = green.computeSaliencyGPU( input,
-                                          &rw,
-                                          &lw,
-                                          &sw );
-			t.stop();*/
+      			// // Timing version, let it run once to warm up the GPU
+      			// /*t.start();
+         //    results = green.computeSaliencyGPU( input,
+         //                                        &rw,
+         //                                        &lw,
+         //                                        &sw );
+      			// t.stop();*/
 
-      results.save( "~/Code/SalientGreenGPU/test/", "jpg" );
-      cv::imwrite( "~/Code/SalientGreenGPU/test/input.jpg", input );
+         //    results.save( "~/Code/SalientGreenGPU/test/", "jpg" );
+         //    cv::imwrite( "~/Code/SalientGreenGPU/test/input.jpg", input );
     }
     else if( std::string( argv[1] ) == "directory" )
     {
-      // int index = 0;
-      // using namespace boost::filesystem2;
-      // std::string ext( argv[2] );
-      // path input( argv[3] );
-      // path outputRW( argv[4] );
-      // path outputLW( argv[5] );
-      // path outputSW( argv[6] );
-      // cv::Mat inputIm;
-
-      // if( exists( input ) && exists( outputRW ) && exists( outputLW ) && exists( outputSW ) )
-      // {
-      //   directory_iterator end;
-
-      //   for( directory_iterator iter( input ); iter != end; ++iter, ++index )
-      //   {
-      //     if( index == 1 )
-      //       t.start();
-
-      //     std::string filePrefix = iter->path().parent_path().string() + "/";
-      //     std::string file = iter->path().stem();
-      //     std::string extension = iter->path().extension();
-
-      //     if( ext != extension )
-      //       continue;
-      //     if( exists( path( outputRW.string() + iter->path().stem() + iter->path().extension() ) ) )
-      //     {
-      //       std::cout << "Skipping " << file << std::endl;
-      //       continue;
-      //     }
-
-      //     std::cout << "Analyzing " << file << std::endl;
-      //     inputIm = cv::imread( iter->path().string() );
-      //     bool resize = false;
-
-      //     int size = 9999;
-
-      //     if( inputIm.rows > size || inputIm.cols > size )
-      //     {
-      //       std::cout << "Input image was too big, resizing to 50%" << std::endl;
-      //       resize = true;
-      //       sg::resizeInPlace( inputIm, cv::Size(), 0.5, 0.5 );
-      //     }
-
-      //     sg::SalientGreenGPU::Results results;
-
-      //     try
-      //     {
-      //       results = green.computeSaliencyGPU( inputIm, &rw, &lw, &sw );
-      //     }
-      //     catch( ... )
-      //     {
-      //       std::cout << "Some kind of runtime error, trying again" << std::endl;
-      //       try
-      //       {
-      //         green.release();
-      //         green = sg::SalientGreenGPU();
-      //         results = green.computeSaliencyGPU( inputIm, &rw, &lw, &sw );
-      //       }
-      //       catch( ... )
-      //       {
-      //         std::cout << "Couldn't recover, skipping image" << std::endl;
-      //         continue;
-      //       }
-      //     }
-
-      //     if( resize )
-      //     {
-      //       sg::resizeInPlace( results.rgbSaliency, cv::Size(), 2, 2 );
-      //       sg::resizeInPlace( results.labSaliency, cv::Size(), 2, 2 );
-      //       sg::resizeInPlace( results.symSaliency, cv::Size(), 2, 2 );
-      //     }
-
-      //     cv::imwrite( outputRW.string() + file + extension, results.rgbSaliency );
-      //     cv::imwrite( outputLW.string() + file + extension, results.labSaliency );
-      //     cv::imwrite( outputSW.string() + file + extension, results.symSaliency );
-      //   }
-      // }
-      // else
-      //   std::cerr << "Directories do not exist\n";
-
-      // t.stop();
     } // end if directory arg
   } // if args
 

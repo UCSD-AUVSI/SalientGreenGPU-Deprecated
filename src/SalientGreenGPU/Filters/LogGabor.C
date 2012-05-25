@@ -55,9 +55,7 @@ sg::LogGabor::LogGabor( int width, int height, cv::Mat const & lowpass,
                         double mult, double sigmaOnf ) :
   itsValid( false ), itsWidth( width ), itsHeight( height ),
   itsMult( mult ),
-  itsSine( height, width, CV_32FC1 ), itsCosine( height, width, CV_32FC1 ),
-	itsSummedMag( height, width, CV_32FC1 ),
-	itsSummedEnergy( height, width, CV_32FC1 )
+  itsSine( height, width, CV_32FC1 ), itsCosine( height, width, CV_32FC1 )
 {
   itsGaborScales.resize( numScales );
 
@@ -122,8 +120,6 @@ void sg::LogGabor::release()
 		for( auto & j : i )
 			j.release();
 
-	itsSummedMag.release();
-	itsSummedEnergy.release();
 	itsBufferReal.release();
 	itsBufferImag.release();
 
@@ -198,7 +194,7 @@ void sg::LogGabor::addFilters( int numOrientations )
   itsValid = true;
 }
 
-void sg::LogGabor::getAndEdgeResponses( cv::gpu::GpuMat const & fftImage, cv::gpu::GpuMat & edges,
+void sg::LogGabor::getEdgeResponses( cv::gpu::GpuMat const & fftImage, cv::gpu::GpuMat & edges,
 		std::vector<cv::gpu::GpuMat> & splitBuffer, DoGCenterSurround & dog )
 {
 	if( !itsValid )

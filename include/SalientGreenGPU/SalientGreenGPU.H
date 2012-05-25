@@ -34,15 +34,6 @@ namespace sg
       //! Contains the results from computing saliency
       struct Results
       {
-				Results() {}
-
-				Results( cv::Size sz ) : 
-					lResponse( sz, CV_32FC1 ),
-					aResponse( sz, CV_32FC1 ),
-					bResponse( sz, CV_32FC1 ),
-					oResponse( sz, CV_32FC1 ),
-					labSaliency( sz, CV_32FC1 ),
-				{}
 
         cv::Mat lResponse;
         cv::Mat aResponse;
@@ -51,6 +42,16 @@ namespace sg
         cv::Mat oResponse;
 
         cv::Mat labSaliency;
+        
+				Results() {}
+
+				Results( cv::Size sz ) : 
+					lResponse( sz, CV_32FC1 ),
+					aResponse( sz, CV_32FC1 ),
+					bResponse( sz, CV_32FC1 ),
+					oResponse( sz, CV_32FC1 ),
+					labSaliency( sz, CV_32FC1 )
+				{}
 
         //! Displays all results on screen
         void show();
