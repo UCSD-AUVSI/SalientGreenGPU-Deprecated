@@ -28,6 +28,24 @@
 // #define BOOST_FILESYSTEM_VERSION 2
 // #include <boost/filesystem.hpp>
 
+sg::SalientGreenGPU::Results runSaliencyAndBlobs(cv::Mat img)
+{
+  sg::SalientGreenGPU::Results results;
+   results = green.computeSaliencyGPU( input,
+                  &lw );
+
+  /////// do connected components
+  cvb::CvBlobs blobs;
+  unsigned int result = cvb::cvLabel(grey, labelImg, blobs);
+  for (cvb::CvBlobs::const_iterator it=blobs.begin(); it!=blobs.end(); ++it)
+  {
+    std::printf("found blob: xy_orig(%d,%d) xy_max(%d,%d)",(*it).minx,(*it).miny,(*it).maxx,(*it).maxy);
+  }
+  ////// end connected components
+
+  return results;
+}
+
 int main( int argc, char ** argv )
 {
   std::cout << "SalientGreenGPU launched\n";
@@ -47,18 +65,8 @@ int main( int argc, char ** argv )
 
   std::cout << "SalientGreenGPU image loaded depth=" << input.depth() << " (CV_32F=" << CV_32F << ") (CV_8U=" << CV_8U << ") scn=" <<  input.channels() <<"\n"; // LEWIS DEBUG
 
-
-  results = green.computeSaliencyGPU( input,
-                  &lw );
-
-  /////// do connected components
-  cvb::CvBlobs blobs;
-  unsigned int result = cvb::cvLabel(grey, labelImg, blobs);
-  for (cvb::CvBlobs::const_iterator it=blobs.begin(); it!=blobs.end(); ++it)
-  {
-    std::printf("found blob: xy_orig(%d,%d) xy_max(%d,%d)",(*it).minx,(*it).miny,(*it).maxx,(*it).maxy);
-  }
-  ////// end connected components
+  results = runSaliencyAndBlobs(input);
+ 
 
   std::cout << "SalientGreenGPU done computing! saving ...\n";
 
