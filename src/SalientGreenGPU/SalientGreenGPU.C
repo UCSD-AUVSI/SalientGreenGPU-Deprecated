@@ -108,10 +108,10 @@ auto sg::SalientGreenGPU::computeSaliencyGPU( cv::Mat const & image,
 
   // convert to float, leave 0 to 255 range
   if( image.type() != CV_32FC3 )
-    itsInputImage.convertTo( itsInputImage, CV_32F );
+    itsInputImage.convertTo( itsInputImage, CV_32FC3 );
 
   // Get the input image on the GPU
-  itsInputImageGPU.upload( itsInputImage );
+  // itsInputImageGPU.upload( itsInputImage ); // LEWIS TEMP: remove soon
 
   // do we need to generate new filters? (we will if this is a different size!)
   if( prevSize != itsInputImage.size() )

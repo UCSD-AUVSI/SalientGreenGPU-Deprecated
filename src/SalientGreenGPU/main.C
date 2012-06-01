@@ -39,9 +39,17 @@ int main( int argc, char ** argv )
   cv::Mat input;
   sg::SalientGreenGPU::Results results;
 
-  input = cv::imread( "~/Code/SalientGreenGPU/test/img_1.JPG");
+  input = cv::Mat(cvLoadImage( "/Users/lewisanderson/Code/Github/SalientGreenGPU/test/test.jpg"));
+  // std::cout << input << "\n";
+  // cv::imshow("input", input);
+  // cvWaitKey(0);
+
+  std::cout << "SalientGreenGPU image loaded depth=" << input.depth() << " (CV_32F=" << CV_32F << ") (CV_8U=" << CV_8U << ") scn=" <<  input.channels() <<"\n"; // LEWIS DEBUG
+
+
   results = green.computeSaliencyGPU( input,
                   &lw );
+  std::cout << "SalientGreenGPU done computing! saving ...\n";
 
   // Timing version, let it run once to warm up the GPU
   /*t.start();
