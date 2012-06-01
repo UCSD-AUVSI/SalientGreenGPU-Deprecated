@@ -23,6 +23,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <iostream>
+#include <cvblob.h>
 
 // #define BOOST_FILESYSTEM_VERSION 2
 // #include <boost/filesystem.hpp>
@@ -49,6 +50,16 @@ int main( int argc, char ** argv )
 
   results = green.computeSaliencyGPU( input,
                   &lw );
+
+  /////// do connected components
+  cvb::CvBlobs blobs;
+  unsigned int result = cvb::cvLabel(grey, labelImg, blobs);
+  for (cvb::CvBlobs::const_iterator it=blobs.begin(); it!=blobs.end(); ++it)
+  {
+    std::printf("found blob: xy_orig(%d,%d) xy_max(%d,%d)",(*it).minx,(*it).miny,(*it).maxx,(*it).maxy);
+  }
+  ////// end connected components
+
   std::cout << "SalientGreenGPU done computing! saving ...\n";
 
   // Timing version, let it run once to warm up the GPU
