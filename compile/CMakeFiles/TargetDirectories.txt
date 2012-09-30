@@ -1,0 +1,2 @@
+/Users/lewisanderson/Code/Github/SalientGreenGPU/compile/CMakeFiles/SalientGreenGPU.dir
+/Users/lewisanderson/Code/Github/SalientGreenGPU/compile/CMakeFiles/cudaCode.dir

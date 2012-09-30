@@ -1,0 +1,82 @@
+--- a/src/SalientGreenGPU/main.C
++++ b/src/SalientGreenGPU/main.C
+@@ -29,6 +29,7 @@
+ 
+ int main( int argc, char ** argv )
+ {
++  std::cout << "SalientGreenGPU launched\n";
+   sg::SalientGreenGPU green;
+   // Timer t;
+ 
+@@ -38,30 +39,52 @@ int main( int argc, char ** argv )
+   sg::SalientGreenGPU::symWeights sw;
+ 
+   //sw.s = 2;
++  cv::Mat input;
++  sg::SalientGreenGPU::Results results;
++  input = cv::imread( "~/Code/SalientGreenGPU/test/img_1.JPG");
++  std::cout << "image loaded\n";
++  results = green.computeSaliencyGPU( input,
++                              &rw,
++                              &lw,
++                              &sw );
++  std::cout << "saliency computed\n";
++
++      // Timing version, let it run once to warm up the GPU
++      /*t.start();
++      results = green.computeSaliencyGPU( input,
++                              &rw,
++                              &lw,
++                              &sw );
++      t.stop();*/
++
++  results.save( "~/Code/SalientGreenGPU/test/", "jpg" );
++  std::cout << "results saved\n";
++  cv::imwrite( "~/Code/SalientGreenGPU/test/input.jpg", input );
++  std::cout << "output written\n";
+ 
+   if( argc > 2 )
+   {
+     if( std::string( argv[1] ) == "file" )
+     {
+-      cv::Mat input;
+-      sg::SalientGreenGPU::Results results;
+-
+-      input = cv::imread( argv[2] );
+-      results = green.computeSaliencyGPU( input,
+-                                          &rw,
+-                                          &lw,
+-                                          &sw );
+-
+-                       // Timing version, let it run once to warm up the GPU
+-                       /*t.start();
+-      results = green.computeSaliencyGPU( input,
+-                                          &rw,
+-                                          &lw,
+-                                          &sw );
+-                       t.stop();*/
+-
+-      results.save( "~/Code/SalientGreenGPU/test/", "jpg" );
+-      cv::imwrite( "~/Code/SalientGreenGPU/test/input.jpg", input );
++   //    cv::Mat input;
++   //    sg::SalientGreenGPU::Results results;
++
++   //    input = cv::imread( "~/Code/SalientGreenGPU/test/", "jpg" );
++   //    results = green.computeSaliencyGPU( input,
++   //                                        &rw,
++   //                                        &lw,
++   //                                        &sw );
++
++                       // // Timing version, let it run once to warm up the GPU
++                       // /*t.start();
++   //    results = green.computeSaliencyGPU( input,
++   //                                        &rw,
++   //                                        &lw,
++   //                                        &sw );
++                       // t.stop();*/
++
++   //    results.save( "~/Code/SalientGreenGPU/test/", "jpg" );
++   //    cv::imwrite( "~/Code/SalientGreenGPU/test/input.jpg", input );
+     }
+     else if( std::string( argv[1] ) == "directory" )
+     {

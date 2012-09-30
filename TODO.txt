@@ -1,0 +1,7 @@
+You can make this a hell of a lot faster if you write some code to do spatial DoG processing on the GPU, like we used in AUVSI_SALIENCY (If you have time, port over the gaussianFilter from AuvsiUtil since it works with single channel float images in the spatial domain and is really, really fast.  You'd also need to port over the function processDoG in Auvsi_Saliency.cu
+
+
+
+TODO:
+
+Write a version of the DoG processing and the iterative processing based off of our old AUVSI_SALIENCY code that runs in the spatial domain and doesn't need FFTs, using the iterative gaussian from the CUDA examples to drive the processing.  This will be wayyyy faster.

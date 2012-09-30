@@ -33,6 +33,15 @@ namespace sg
 	//! Normalizes using maxnorm on the GPU, in place
   void maxNormalize( cv::gpu::GpuMat & input );
 
+
+	// Convolution parameters
+	static const double inhSig = 40; // 25
+	static const double exhSig = 4; // 2
+	static const double inhCoef = 1.5; // 1.5
+	static const double exhCoef = 0.5; // 0.5
+	static const double inhibCoef = 5.0; // 2.0
+
+
   //! A class for performing iterative normalization in the spatial domain
   /*! Normalizes images using an iterative application
       of a difference of gaussian filter */
@@ -54,13 +63,6 @@ namespace sg
           @return the normalized image */
       void operator()( cv::gpu::GpuMat const & input, cv::gpu::GpuMat & output, std::vector<cv::gpu::GpuMat> & splitBuffer, int numIter = 3 );
       
-			// Convolution parameters
-      static constexpr double inhSig = 40; // 25
-      static constexpr double exhSig = 4; // 2
-      static constexpr double inhCoef = 1.5; // 1.5
-      static constexpr double exhCoef = 0.5; // 0.5
-      static constexpr double inhibCoef = 5.0; // 2.0
-
     private:
       bool itsInitialized;
 

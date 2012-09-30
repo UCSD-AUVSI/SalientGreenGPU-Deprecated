@@ -46,10 +46,10 @@ namespace sg
 			//! Create a center surround filter bank
 			/*! @param[in] maxhw Maximum height or width for filter in spatial domain 
 			    @param[n] size Total padded size for filters
-			 		@param[in] initSigma Sigma for the first gaussian
+			 		@param[in] initSigma Sigma for the first gaussian (was 4)
 					@param[in] mult multiplicative difference between wide and narrow gaussians that compose DoG
-					@param[in] scales Number of DoG filters to generate */
-			DoGCenterSurround( int maxhw, cv::Size const & size, double initSigma = 4, double mult = 1.6, int scales = 4, double scaleFactor = 2.0 );
+					@param[in] scales Number of DoG filters to generate (was 4) */
+			DoGCenterSurround( int maxhw, cv::Size const & size, double initSigma = 1.6, double mult = 1.6, int scales = 3, double scaleFactor = 1.6 );
 
 			void release();
 
@@ -59,7 +59,7 @@ namespace sg
 			void operator()( cv::gpu::GpuMat const & input, cv::gpu::GpuMat & output );
 
 			//! Calculates the largest filter size possible
-			static int largestFilterSize( int maxhw, double initSigma = 4, double mult = 1.6, int scales = 4, double scaleFactor = 2.0 );
+			static int largestFilterSize( int maxhw, double initSigma = 1.6, double mult = 1.6, int scales = 3, double scaleFactor = 1.6 );
 
 		private:
 			bool itsIsValid; //!< Whether we have valid filters

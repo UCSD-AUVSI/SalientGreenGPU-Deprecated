@@ -67,12 +67,12 @@ namespace sg
           @param[in] width filter width
           @param[in] height filter height
           @param[in] lowpass Gaussian envelope applied to all scales
-          @param[in] numScales Number of scales to use
-          @parma[in] minWaveLength Wavelength for smallest scale
-          @param[in] mult Scaling factor between scales
-          @param[in] sigmaOnf Ratio of standard deviation of Gaussian describing the log gabor filter's transfer function */
-      LogGabor( int width, int height, cv::Mat const & lowpass, int numScales = 2, double minWaveLength = 3.0,
-                double mult = 3.00, double sigmaOnf = 0.55 );
+          @param[in] numScales Number of scales to use (was 2)
+          @parma[in] minWaveLength Wavelength for smallest scale (was 3)
+          @param[in] mult Scaling factor between scales (was 3.00)
+          @param[in] sigmaOnf Ratio of standard deviation of Gaussian describing the log gabor filter's transfer function (was 0.55) */
+      LogGabor( int width, int height, cv::Mat const & lowpass, int numScales = 2, double minWaveLength = 2.0,
+                double mult = 2.00, double sigmaOnf = 0.55 );
       // LEWIS: was numScales=6
 
 			// 7 1.75 .55 20.0 

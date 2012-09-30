@@ -23,6 +23,8 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/gpu/gpu.hpp>
 
+#define M_PI 3.14159265 
+
 namespace sg
 {
   //! Swap the quadrants in a matrix in place
